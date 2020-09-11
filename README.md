@@ -1,5 +1,5 @@
 # simppl
-package for writing simple command-line pipelines, and organized command-line tools
+package for writing simple command-line pipelines, and organized command-line tools. <br>
 The package is composed of two seperate but intertwined python scripts:
 1. simple_pipeline.py - defines SimplePipeline class
 2. cli.py - defines CommandLineInterface class, and utility functions
@@ -22,11 +22,11 @@ sp = SimplePipeline(debug=False, start=0, end=100):
 sp.print_and_run('<YOUR_OS_COMMAND_HERE>)
 ~~~
 
-## cli
-CommandLineInterface enables turning a collection of python executable scripts into a unified cli.
+## simppl.cli
+simppl.cli enables turning a collection of python executable scripts into a unified cli.
 - Creates a single entrypoint for running the command-line tools
 - Standardized tool development and documentation
-- adds a manual which lists all available tools and packages with minimal development overhead
+- Adds a manual which lists all available tools and packages with minimal development overhead
 
 ### Using cli:
 - example_module gives an example of how to use CommandLineInterface in your project
