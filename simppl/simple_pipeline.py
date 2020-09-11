@@ -68,22 +68,22 @@ class SimplePipeline:
                 command += ' 2> ' + err
             self._private_print_and_run(command, command)
 
-    def print_and_run_cbt(self, cbt, positional_args: list, optional_args: dict, flags: set = {}):
+    def print_and_run_clt(self, clt, positional_args: list, optional_args: dict, flags: set = {}):
         self.command_counter += 1
         positional_args = [str(x) for x in positional_args]
 
-        tool_name = cbt.__module__.split('.')[-1]
+        tool_name = clt.__module__.split('.')[-1]
         all_args = positional_args
         [all_args.extend([str(k), str(v)]) for k, v in optional_args.items()]
         [all_args.extend([str(k)]) for k in flags]
-        command_for_print = f'python -m compbio {tool_name} ' + ' '.join(all_args)
+        command_for_print = f'python -m <module> {tool_name} ' + ' '.join(all_args)
         if self.command_counter < self.start or self.command_counter > self.end:
             self._print_skip_command(command_for_print)
             return
         self._print_command(command_for_print)
         if self.execute:
             start = time.time()
-            cbt(['internal_tool'] + all_args)
+            clt(['internal_tool'] + all_args)
             end = time.time()
             if self.print_timing:
                 self.logger.info('Time elapsed %s: %d s' % (tool_name, end - start))

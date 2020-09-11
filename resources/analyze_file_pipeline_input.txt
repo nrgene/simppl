@@ -1,0 +1,2 @@
+This file contains the word word 4 times.
+It should output 4 for the count of the word word

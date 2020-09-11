@@ -3,11 +3,11 @@ import sys
 from argparse import ArgumentParser
 from functools import wraps
 
-from compbio.core.simple_pipeline import SimplePipeline
+from simppl.simple_pipeline import SimplePipeline
 
 
 def print_args(argv):
-    sys.stderr.write(f'#command:\npython -m compbio ')
+    sys.stderr.write('python -m <module_name>')
     key = None
     for field in argv:
         if field.startswith('-'):
@@ -25,7 +25,7 @@ def print_args(argv):
     sys.stderr.write('\n')
 
 
-def compbio_tool(run_function):
+def command_line_tool(run_function):
     @wraps(run_function)
     def wrapper(argv):
         # print command if not internal_tool (which was ran from another tool)
@@ -33,9 +33,9 @@ def compbio_tool(run_function):
             print_args(argv)
 
         if run_function.__doc__ is None:
-            raise RuntimeError(f'Must define a docstring for compbio_tool: {run_function.__module__}')
+            raise RuntimeError(f'Must define a docstring for command_line_tool: {run_function.__module__}')
         if run_function.__name__ != 'run':
-            raise RuntimeError(f'only functions named "run" can be a compbio_tool, got: {run_function.__name__}')
+            raise RuntimeError(f'only functions named "run" can be a command_line_tool, got: {run_function.__name__}')
         run_function(argv)
     return wrapper
 
@@ -43,7 +43,7 @@ def compbio_tool(run_function):
 def get_simple_pipeline(arg_parser: ArgumentParser, argv: list, name):
     """
     :param arg_parser: argument parser, will add SimplePipeline arguments to it
-    :param argv: arguments list of compbio_tool
+    :param argv: arguments list of command_line_tool
     :param name: __name__ of calling module, used in logging
     :return: simple_pipeline object
     """
@@ -54,8 +54,8 @@ def get_simple_pipeline(arg_parser: ArgumentParser, argv: list, name):
 
 def get_parser(prog, description):
     """
-    :param prog: compbio-tool name (argv[0])
-    :param description: compbio-tool description (__doc__)
+    :param prog: command_line_tool name (argv[0])
+    :param description: command_line_tool description (__doc__)
     :return: argument parser
     """
     return argparse.ArgumentParser(description=description, prog=prog, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
