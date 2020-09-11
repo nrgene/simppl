@@ -1,7 +1,19 @@
 # simppl
 package for writing simple command-line pipelines, and organized command-line tools
+The package is composed of two seperate but intertwined python scripts:
+1. simple_pipeline.py - defines SimplePipeline class
+2. cli.py - defines CommandLineInterface class, and utility functions
 
-## Using SimplePipeline
+## SimplePipeline
+SimplePipeline conveniently enables turning a python cli script into a pipeline of os commands.
+- It enables running os commands sequentially / concurrently.
+- Each command / commands-batch is given an index.
+- The user can run a sub-sequence of commands by specifying -fc (first_command) and -lc (last_command) flags.
+- It is also possible to dry_run the pipeline using -d flag.
+- Each command is printed before execution, and is also optionally timed.
+- outputs/errors from sub-commands are collected and logged.
+
+### Using SimplePipeline
 SimplePipeline can be used together with CommandLineInterface, or independently. <br>
 The simplest indepent usage will look like this:
 ~~~
@@ -9,7 +21,14 @@ from simple_pipeline import SimplePipeline
 sp = SimplePipeline(debug=False, start=0, end=100):
 sp.print_and_run('<YOUR_OS_COMMAND_HERE>)
 ~~~
-## Using CommandLineInterface:
+
+## cli
+CommandLineInterface enables turning a collection of python executable scripts into a unified cli.
+- Creates a single entrypoint for running the command-line tools
+- Standardized tool development and documentation
+- adds a manual which lists all available tools and packages with minimal development overhead
+
+### Using cli:
 - example_module gives an example of how to use CommandLineInterface in your project
 - requirements:
     - __main__.py - define toolbox logo, constructs and runs the CommandLineInterface. 
@@ -17,8 +36,9 @@ sp.print_and_run('<YOUR_OS_COMMAND_HERE>)
     - logging_config.ini - python.logging configuration
     - tools - each script defined as command_line_tool will be automatically added to the toolbox
     
-    
-## Command-line-tool example:
+
+## Examples 
+### Command-line-tool example:
 - See example_module/add_two_numbers.py
 ~~~
 python -m example_module add_two_numbers 5 6
@@ -31,7 +51,7 @@ def run(argv):
 ~~~
 
 
-## Example for running command-line-tool using SimplePipeline
+### Example for running command-line-tool using SimplePipeline
 ~~~
 python -m example_module analyze_file_pipeline resources/analyze_file_pipeline_input.txt test_outputs
 ~~~
