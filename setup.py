@@ -4,7 +4,7 @@ setup(
     name="simppl",
     author='Doron Shem-Tov',
     author_email='doronst5@gmail.com',
-    version="1.0.0",
+    version="1.0.1",
     packages=find_packages(),
     include_package_data=True,
     url="https://github.com/nrgene/simppl",
