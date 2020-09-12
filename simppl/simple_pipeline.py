@@ -18,7 +18,7 @@ class SimplePipeline:
     """
     command_counter = 0
 
-    def __init__(self, debug, start, end, print_timing=True, name=__name__, output_stream=None):
+    def __init__(self, start, end, debug=False, print_timing=True, name=__name__, output_stream=None):
         if debug:
             self.execute = False
         else:
@@ -34,28 +34,6 @@ class SimplePipeline:
             logger.addHandler(stream_handler)
         logger.setLevel(logging.INFO)
         self.logger = logger
-
-    @staticmethod
-    def get_program_name(command):
-        if 'nbtk.jar' in command:
-            arr = command.split()
-            jar_field_was_last = False
-            for field in arr:
-                if 'nbtk.jar' in field:
-                    jar_field_was_last = True
-                elif jar_field_was_last:
-                    return field
-        if command.split()[0] in ['python', 'python2.7', 'python3.7', 'perl', 'java', 'sh', 'bash']:
-            program_name = os.path.basename(command.split()[1])
-        else:
-            program_name = os.path.basename(command.split()[0])
-        return program_name
-
-    @staticmethod
-    def add_parse_args(parser):
-        parser.add_argument('-d', action='store_const', const=True, help='Print debug info instead of executing')
-        parser.add_argument('-fc', default=0, help='Index of the first command to execute')
-        parser.add_argument('-lc', default=10000, help='Index of the last command to execute')
 
     def print_and_run(self, command, out=None, err=None):
         self.command_counter += 1
@@ -118,6 +96,28 @@ class SimplePipeline:
                 self.logger.info('Time elapsed %s: %d s' % (program_name, end - start))
         else:
             [self._print_command(command) for command in commands]
+
+    @staticmethod
+    def get_program_name(command):
+        if 'nbtk.jar' in command:
+            arr = command.split()
+            jar_field_was_last = False
+            for field in arr:
+                if 'nbtk.jar' in field:
+                    jar_field_was_last = True
+                elif jar_field_was_last:
+                    return field
+        if command.split()[0] in ['python', 'python2.7', 'python3.7', 'perl', 'java', 'sh', 'bash']:
+            program_name = os.path.basename(command.split()[1])
+        else:
+            program_name = os.path.basename(command.split()[0])
+        return program_name
+
+    @staticmethod
+    def add_parse_args(parser):
+        parser.add_argument('-d', action='store_const', const=True, help='Print debug info instead of executing')
+        parser.add_argument('-fc', default=0, help='Index of the first command to execute')
+        parser.add_argument('-lc', default=10000, help='Index of the last command to execute')
 
     def _private_print_and_run(self, command, command_to_print):
         program_name = self.get_program_name(command)
