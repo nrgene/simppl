@@ -1,5 +1,5 @@
 # simppl
-#####Package for writing simple command-line pipelines, and organized command-line toolboxes. 
+##### Package for writing simple command-line pipelines, and organized command-line toolboxes. 
 
 The package is composed of two separate but intertwined modules:
 1. **simple_pipeline** - aids writing command-line pipelines with minimal overhead. Can be integrated into any python script.
