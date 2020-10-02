@@ -12,7 +12,7 @@ Each module has functionalities that use the other.
 The simple_pipeline module defines the SimplePipeline class. <br>
 SimplePipeline conveniently enables turning a python cli script (executed from terminal) into a pipeline of os commands.
 - It enables running os commands sequentially / concurrently.
-- Uses multiprocessing to easily implement scatter-gather pattern 
+- Uses multiprocessing to easily imple:wqment scatter-gather pattern 
 - Each command / commands-batch is given an index.
 - The user can run a sub-sequence of commands by specifying -fc (first_command) and -lc (last_command) flags.
 - Has option to dry_run the pipeline using -d flag.
@@ -106,3 +106,6 @@ python -m <module_name> analyze_file_pipeline  resources/analyze_file_pipeline_i
 2020-09-11 14:31:05,649 - analyze_file_pipeline - INFO - 3) sed 's/\s/\n/g' resources/analyze_file_pipeline_input.txt | sort | uniq -c | sort -n > test_outputs/word_count.txt
 2020-09-11 14:31:05,653 - analyze_file_pipeline - INFO - Time elapsed sed: 0 s
 ~~~
+# Distribution
+Distribution to pypi was done by following this manual:
+https://packaging.python.org/tutorials/packaging-projects/
