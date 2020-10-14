@@ -12,7 +12,7 @@ class TestSimplePipeline(unittest.TestCase):
 
     def test_print_and_run(self):
         output_stream = io.StringIO()
-        sp = SimplePipeline(False, 0, 10, output_stream=output_stream)
+        sp = SimplePipeline(0, 10, output_stream=output_stream)
         sp.print_and_run('echo 5')
         sp.print_and_run('date --version > /dev/null')
         output_stream.seek(0)
@@ -26,7 +26,7 @@ class TestSimplePipeline(unittest.TestCase):
 
     def test_print_and_run_with_name(self):
         output_stream = io.StringIO()
-        sp = SimplePipeline(False, 0, 10, name=__name__, output_stream=output_stream)
+        sp = SimplePipeline(0, 10, name=__name__, output_stream=output_stream)
         sp.print_and_run('echo 5')
         output_stream.seek(0)
         lines = output_stream.readlines()
@@ -50,13 +50,13 @@ class TestSimplePipeline(unittest.TestCase):
         expected_sleep_seconds = math.ceil(3 / available_cpus)
         output_stream = io.StringIO()
         start = time.time()
-        sp = SimplePipeline(False, 0, 10, output_stream=output_stream)
+        sp = SimplePipeline(0, 10, output_stream=output_stream)
         sp.run_parallel(['sleep 1', 'sleep 1', 'sleep 1'], available_cpus)
         self.assertEqual(math.floor(time.time() - start), expected_sleep_seconds)
 
     def test_debug_mode(self):
         output_stream = io.StringIO()
-        sp = SimplePipeline(True, 0, 10, output_stream=output_stream)
+        sp = SimplePipeline(0, 10, debug=True, output_stream=output_stream)
         sp.print_and_run('date --version > /dev/null')
         sp.run_parallel(['sleep 0.1', 'sleep 0.4', 'sleep 1'], multiprocessing.cpu_count())
         sp.print_and_run('date > /dev/null')
@@ -64,7 +64,7 @@ class TestSimplePipeline(unittest.TestCase):
         print(''.join(output_stream.readlines()))
         output_stream.seek(0)
         lines = output_stream.readlines()
-        self.assertTrue('1) date' in lines[0])
+        self.assertTrue('1) date' in lines[0], '1) date should be in first log line')
         for line in lines[1:3]:
             self.assertTrue('2) sleep' in line)
         self.assertTrue('3) date > /dev/null' in lines[4])
@@ -72,22 +72,18 @@ class TestSimplePipeline(unittest.TestCase):
 
     def test_print_and_run_failure(self):
         output_stream = io.StringIO()
-        sp = SimplePipeline(False, 0, 10, output_stream=output_stream)
+        sp = SimplePipeline(0, 10, output_stream=output_stream)
         with pytest.raises(RuntimeError):
             sp.print_and_run('python no_existing.py')
 
     def test_run_parallel_failure(self):
-        output_stream = io.StringIO()
-        sp = SimplePipeline(True, 0, 10, name=__name__, output_stream=output_stream)
-        sp.run_parallel(['python no_existing.py', 'echo hello'], multiprocessing.cpu_count())
-
-        sp = SimplePipeline(False, 0, 10)
+        sp = SimplePipeline(0, 10)
         with pytest.raises(RuntimeError):
             sp.run_parallel(['python no_existing.py', 'echo hello'], multiprocessing.cpu_count())
 
-    def test_run_cbt_debug_mode(self):
+    def test_run_clt_debug_mode(self):
         output_stream = io.StringIO()
-        sp = SimplePipeline(True, 0, 10, output_stream=output_stream)
+        sp = SimplePipeline(0, 10, debug=True, output_stream=output_stream)
         sp.print_and_run_clt(add_two_numbers.run, ['arg1', 'arg2'], {'-key1': 'val1', '-key2': 'val2'},
                              {'--flag'})
         output_stream.seek(0)

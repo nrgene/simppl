@@ -69,7 +69,8 @@ class SimplePipeline:
     def run_parallel(self, commands, max_num_of_processes):
         self.command_counter += 1
         if self.command_counter < self.start or self.command_counter > self.end:
-            self._print_skip_command(commands[0])
+            for command in commands:
+                self._print_skip_command(command)
             return
 
         if self.execute:

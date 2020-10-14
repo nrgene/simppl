@@ -138,7 +138,7 @@ def get_simple_pipeline(arg_parser: ArgumentParser, argv: list, name):
     """
     SimplePipeline.add_parse_args(arg_parser)
     args = arg_parser.parse_args(argv[1:])
-    return SimplePipeline(args.d, args.fc, args.lc, True, name=name)
+    return SimplePipeline(args.fc, args.lc, debug=args.d, print_timing=True, name=name)
 
 
 def get_parser(prog, description):
