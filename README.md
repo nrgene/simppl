@@ -43,7 +43,7 @@ sp.print_and_run_clt(example_tool.run, ['first_number', 'second_nmber'],
                              {'--flag'})
 ~~~
 
-####Note that in order to see the commands printed, you will need to configure logging. See example_module/logging_config.ini for example.
+#### Note that in order to see the commands printed, you will need to configure logging. See example_module/logging_config.ini for example.
 
 ## cli
 cli enables turning a collection of python executable scripts into a unified cli.
