@@ -2,4 +2,6 @@ from logging.config import fileConfig
 from os import path
 
 log_file_path = path.join(path.dirname(path.abspath(__file__)), 'logging_config.ini')
+if not path.exists(log_file_path):
+    exit(f'missing logging config file: {log_file_path}')
 fileConfig(log_file_path)
