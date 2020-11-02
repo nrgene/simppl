@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 setup(
     name="simppl",
     author='NRGene',
-    author_email='devops@nrgene.com',
+    author_email='yossi.eliaz@nrgene.com',
     version="1.0.2",
     packages=find_packages(),
     include_package_data=True,
