@@ -5,8 +5,8 @@ with open("README.md", "r") as fh:
 
 setup(
     name="simppl",
-    author='Doron Shem-Tov',
-    author_email='doronst5@gmail.com',
+    author='NRGene',
+    author_email='devops@nrgene.com',
     version="1.0.2",
     packages=find_packages(),
     include_package_data=True,
