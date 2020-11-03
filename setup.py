@@ -6,8 +6,8 @@ with open("README.md", "r") as fh:
 setup(
     name="simppl",
     author='NRGene',
-    author_email='yossi.eliaz@nrgene.com',
-    version="1.0.3",
+    author_email='open-source@nrgene.com',
+    version="1.0.4",
     packages=find_packages(),
     include_package_data=True,
     url="https://github.com/nrgene/simppl",
