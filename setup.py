@@ -7,7 +7,7 @@ setup(
     name="simppl",
     author='NRGene',
     author_email='yossi.eliaz@nrgene.com',
-    version="1.0.2",
+    version="1.0.3",
     packages=find_packages(),
     include_package_data=True,
     url="https://github.com/nrgene/simppl",
