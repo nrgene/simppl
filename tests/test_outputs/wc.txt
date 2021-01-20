@@ -1,1 +1,0 @@
- 1 19 91 /home/doron/src/github.com/simppl/tests/resources/analyze_file_pipeline_input.txt

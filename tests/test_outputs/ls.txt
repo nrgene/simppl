@@ -1,1 +1,0 @@
--rw-r--r-- 1 doron doron 91 Jan 20 11:49 /home/doron/src/github.com/simppl/tests/resources/analyze_file_pipeline_input.txt
