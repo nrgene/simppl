@@ -56,6 +56,17 @@ cli enables turning a collection of python executable scripts into a unified cli
 - requirements:
     - __main__.py - define toolbox logo, constructs and runs the CommandLineInterface.
     - __init__.py - set logging configuration
+    
+#### cli supports two modes of operation:
+- explicit-tool-loading: 
+    - tools list is explicitly passed as argument in the constructor.
+    - good for project with few changes in tool content.
+    - should be used in projects where runtime overhead is critical. 
+- automatic-tool-loading:
+    - tools are annotated and dynamically searched for in project files.
+    - good for projects with many changes in tool content / many collaborators
+    - easy tool addition - tool addition/removal don't require touching the toolbox main module.
+    - adds runtime overhead before every tool execution (depends on project sources size)
 
 #### Explicit tool loading mode:  
   ~~~
