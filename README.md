@@ -51,13 +51,42 @@ cli enables turning a collection of python executable scripts into a unified cli
 - Standardized tool development and documentation
 - Adds a manual printout listing all available tools and packages with minimal development overhead
 
-### Using cli:
+### Using cli - developer side:
 - example_module gives an example of how to use CommandLineInterface in your project
 - requirements:
-    - __main__.py - define toolbox logo, constructs and runs the CommandLineInterface. 
+    - __main__.py - define toolbox logo, constructs and runs the CommandLineInterface.
     - __init__.py - set logging configuration
-    - logging_config.ini - python.logging configuration
-    - tools - each script defined as command_line_tool will be automatically added to the toolbox
+    
+#### cli supports two modes of operation:
+- explicit-tool-loading: 
+    - tools list is explicitly passed as argument in the constructor.
+    - good for project with few changes in tool content.
+    - should be used in projects where runtime overhead is critical. 
+- automatic-tool-loading:
+    - tools are annotated and dynamically searched for in project files.
+    - good for projects with many changes in tool content / many collaborators
+    - easy tool addition - tool addition/removal don't require touching the toolbox main module.
+    - adds runtime overhead before every tool execution (depends on project sources size)
+
+#### Explicit tool loading mode:  
+  ~~~
+  import package1.module1
+  import package1.modele2
+  import pakage2.module1
+
+  if __name__ == '__main__':
+    modules_list = [package1.module1, package1.module2, package2.module1]
+    cli = CommandLineInterface(__file__, ascii_logo, modules_list)
+    cli.run(sys.argv)
+  ~~~ 
+    
+#### Automatic tool loading mode:  
+  ~~~
+  if __name__ == '__main__':
+    cli = CommandLineInterface(__file__, ascii_logo)
+    cli.run(sys.argv)
+  ~~~ 
+  This mode requires to annotate tool 'run' methods with *command_line_tool* decorator
 
 Defining a script as command_line_tool:
 ~~~
@@ -71,6 +100,7 @@ def run(argv):
     # Do something here using any python code
 ~~~
 
+### Using cli - user side
 Printing manual (run the package with no arguments):
 ~~~
 python -m your_toolbox_package_name 

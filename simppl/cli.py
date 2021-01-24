@@ -4,24 +4,31 @@ import re
 import argparse
 import sys
 from argparse import ArgumentParser
+from collections import defaultdict
 from functools import wraps
+from typing import List
 
-from colorama import Fore  # , Back, Style
+from colorama import Fore
 from simppl.simple_pipeline import SimplePipeline
 
 
 class CommandLineInterface:
 
-    def __init__(self, main_path, module_ascii_logo):
-        self.module_ascii_logo = module_ascii_logo
-        self.module_path = os.path.dirname(main_path)
-        self.module_name = os.path.basename(self.module_path)
-        self.command_line_tools = {}
-        self.tool_name_to_package = {}
+    def __init__(self, main_path: str, module_ascii_logo: str, modules_list: list = None):
+        self.cli_ascii_logo = module_ascii_logo
+        self.cli_path = os.path.dirname(main_path)
+        self.cli_name = os.path.basename(self.cli_path)
+        self.modules_list: list = modules_list
+        self.command_line_tools = defaultdict(dict)
+        self.tool_name_to_package = defaultdict()
+        if modules_list is None:
+            self.__load_tools()
+        else:
+            self.__add_tools_from_list()
 
     def print_usage(self):
-        print(Fore.GREEN + self.module_ascii_logo)
-        print(Fore.RED + f'\tUsage: python -m {self.module_name} <tool_name> <arg1, arg2, ...>\n')
+        print(Fore.GREEN + self.cli_ascii_logo)
+        print(Fore.RED + f'\tUsage: python -m {self.cli_name} <tool_name> <arg1, arg2, ...>\n')
         print(Fore.RESET + 'Tools list:')
         print('-----------\n')
         for package_name in sorted(self.command_line_tools):
@@ -37,9 +44,9 @@ class CommandLineInterface:
         return ''
 
     # Add new tools to and return as map<package, tool_name, command_line_tool_run_method>
-    def load_tools(self):
-        script_dir = self.module_path
-        root_dir = os.path.dirname(self.module_path) + '/'
+    def __load_tools(self):
+        script_dir = self.cli_path
+        root_dir = os.path.dirname(self.cli_path) + os.sep
 
         for subdir, dirs, files in os.walk(script_dir):
             # skip non python package dirs
@@ -53,28 +60,28 @@ class CommandLineInterface:
                     found_tool_definition = False
                     module_str = file_path.replace(root_dir, '').replace(os.sep, '.')
                     module_str = re.sub('.py$', '', module_str)
-                    for line in open(file_path, encoding='utf8'):
-                        line = line.strip()
-                        if line == '@command_line_tool':
-                            found_tool_definition = True
-                        if found_tool_definition:
-                            module = importlib.import_module(module_str)
-                            package_name = module_str.split('.')[-2]
-                            module_name = module_str.split('.')[-1]
-                            if package_name not in self.command_line_tools:
-                                self.command_line_tools[package_name] = {}
-                            try:
-                                if module.run.__doc__ is None:
-                                    raise RuntimeError(f'Must define a docstring for command_line_tool: {module_str}')
-                            except AttributeError:
-                                raise RuntimeError(
-                                    f'command_line_tool module {module_str} must implement a run method.')
+                    with open(file_path, encoding='utf8') as fh:
+                        for line in fh:
+                            line = line.strip()
+                            if line == '@command_line_tool':
+                                found_tool_definition = True
+                            if found_tool_definition:
+                                module = importlib.import_module(module_str)
+                                package_name = module_str.split('.')[-2]
+                                module_name = module_str.split('.')[-1]
+                                if package_name not in self.command_line_tools:
+                                    self.command_line_tools[package_name] = {}
+                                try:
+                                    if module.run.__doc__ is None:
+                                        raise RuntimeError(f'Must define a docstring for command_line_tool: {module_str}')
+                                except AttributeError:
+                                    raise RuntimeError(
+                                        f'command_line_tool module {module_str} must implement a run method.')
 
-                            self.command_line_tools[package_name][module_name] = module.run
-                            self.tool_name_to_package[module_name] = package_name
+                                self.command_line_tools[package_name][module_name] = module.run
+                                self.tool_name_to_package[module_name] = package_name
 
     def run(self, argv):
-        self.load_tools()
         if len(argv) == 1:
             self.print_usage()
             return 0
@@ -83,15 +90,25 @@ class CommandLineInterface:
         package = self.command_line_tools[self.tool_name_to_package[tool_name]]
 
         if tool_name in package:
-            self.run_tool(tool_name, package, argv[2:])
-            return 0
+            exit_code = self.__run_tool(tool_name, package, argv[1:])
+            return exit_code
         else:
             raise RuntimeError(f'Could not find tool: {tool_name} \n{self.print_usage()}')
 
+    def __add_tools_from_list(self):
+        for tool in self.modules_list:
+            tool_name = tool.__name__.split('.')[-1]
+            package = tool.__package__
+            self.command_line_tools[package][tool_name] = tool.run
+            self.tool_name_to_package[tool_name] = package
+
     @staticmethod
-    def run_tool(tool_name: str, package: dict, arguments_list):
-        argv = [tool_name] + arguments_list
-        package[tool_name](argv)
+    def __run_tool(tool_name: str, package: dict, argv: List[str]) -> int:
+        exit_code = package[tool_name](argv)
+        # interpret run method with no return value as successful run
+        if exit_code is None:
+            exit_code = 0
+        return exit_code
 
 
 def print_args(argv):
