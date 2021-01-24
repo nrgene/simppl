@@ -51,13 +51,31 @@ cli enables turning a collection of python executable scripts into a unified cli
 - Standardized tool development and documentation
 - Adds a manual printout listing all available tools and packages with minimal development overhead
 
-### Using cli:
+### Using cli - developer side:
 - example_module gives an example of how to use CommandLineInterface in your project
 - requirements:
-    - __main__.py - define toolbox logo, constructs and runs the CommandLineInterface. 
+    - __main__.py - define toolbox logo, constructs and runs the CommandLineInterface.
     - __init__.py - set logging configuration
-    - logging_config.ini - python.logging configuration
-    - tools - each script defined as command_line_tool will be automatically added to the toolbox
+
+#### Explicit tool loading mode:  
+  ~~~
+  import package1.module1
+  import package1.modele2
+  import pakage2.module1
+
+  if __name__ == '__main__':
+    modules_list = [package1.module1, package1.module2, package2.module1]
+    cli = CommandLineInterface(__file__, ascii_logo, modules_list)
+    cli.run(sys.argv)
+  ~~~ 
+    
+#### Automatic tool loading mode:  
+  ~~~
+  if __name__ == '__main__':
+    cli = CommandLineInterface(__file__, ascii_logo)
+    cli.run(sys.argv)
+  ~~~ 
+  This mode requires to annotate tool 'run' methods with *command_line_tool* decorator
 
 Defining a script as command_line_tool:
 ~~~
@@ -71,6 +89,7 @@ def run(argv):
     # Do something here using any python code
 ~~~
 
+### Using cli - user side
 Printing manual (run the package with no arguments):
 ~~~
 python -m your_toolbox_package_name 
