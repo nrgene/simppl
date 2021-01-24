@@ -46,7 +46,7 @@ class CommandLineInterface:
     # Add new tools to and return as map<package, tool_name, command_line_tool_run_method>
     def __load_tools(self):
         script_dir = self.cli_path
-        root_dir = os.path.dirname(self.cli_path) + '/'
+        root_dir = os.path.dirname(self.cli_path) + os.sep
 
         for subdir, dirs, files in os.walk(script_dir):
             # skip non python package dirs
@@ -60,25 +60,26 @@ class CommandLineInterface:
                     found_tool_definition = False
                     module_str = file_path.replace(root_dir, '').replace(os.sep, '.')
                     module_str = re.sub('.py$', '', module_str)
-                    for line in open(file_path, encoding='utf8'):
-                        line = line.strip()
-                        if line == '@command_line_tool':
-                            found_tool_definition = True
-                        if found_tool_definition:
-                            module = importlib.import_module(module_str)
-                            package_name = module_str.split('.')[-2]
-                            module_name = module_str.split('.')[-1]
-                            if package_name not in self.command_line_tools:
-                                self.command_line_tools[package_name] = {}
-                            try:
-                                if module.run.__doc__ is None:
-                                    raise RuntimeError(f'Must define a docstring for command_line_tool: {module_str}')
-                            except AttributeError:
-                                raise RuntimeError(
-                                    f'command_line_tool module {module_str} must implement a run method.')
+                    with open(file_path, encoding='utf8') as fh:
+                        for line in fh:
+                            line = line.strip()
+                            if line == '@command_line_tool':
+                                found_tool_definition = True
+                            if found_tool_definition:
+                                module = importlib.import_module(module_str)
+                                package_name = module_str.split('.')[-2]
+                                module_name = module_str.split('.')[-1]
+                                if package_name not in self.command_line_tools:
+                                    self.command_line_tools[package_name] = {}
+                                try:
+                                    if module.run.__doc__ is None:
+                                        raise RuntimeError(f'Must define a docstring for command_line_tool: {module_str}')
+                                except AttributeError:
+                                    raise RuntimeError(
+                                        f'command_line_tool module {module_str} must implement a run method.')
 
-                            self.command_line_tools[package_name][module_name] = module.run
-                            self.tool_name_to_package[module_name] = package_name
+                                self.command_line_tools[package_name][module_name] = module.run
+                                self.tool_name_to_package[module_name] = package_name
 
     def run(self, argv):
         if len(argv) == 1:
