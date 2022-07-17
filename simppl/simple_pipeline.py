@@ -56,8 +56,14 @@ class SimplePipeline:
         else:
             self._private_print_and_run(command, command)
 
-    def print_and_run_clt(self, clt, positional_args: list, optional_args: dict, flags: set = {}):
+    def print_and_run_clt(self, clt, positional_args: list, optional_args: dict, flags: set = {}, module_name: str = None):
         self.command_counter += 1
+
+        if module_name is None:
+            self.logging_extra = {'module_var': self.name}
+        else:
+            self.logging_extra = {'module_var': module_name}
+
         positional_args = [str(x) for x in positional_args]
 
         tool_name = clt.__module__.split('.')[-1]
