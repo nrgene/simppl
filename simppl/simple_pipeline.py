@@ -1,6 +1,7 @@
 import logging
 import os
 import subprocess
+import sys
 import time
 from multiprocessing.pool import ThreadPool
 
@@ -18,7 +19,7 @@ class SimplePipeline:
     """
     command_counter = 0
 
-    def __init__(self, start, end, debug=False, print_timing=True, name=__name__, output_stream=None):
+    def __init__(self, start, end, debug=False, print_timing=True, name: str = __name__, output_stream=sys.stderr):
         if debug:
             self.execute = False
         else:
@@ -26,24 +27,33 @@ class SimplePipeline:
         self.start = int(start)
         self.end = int(end)
         self.print_timing = print_timing
+        self.name = name
+        self.logging_extra = None
         logger = logging.getLogger(name)
         if output_stream:
             stream_handler = logging.StreamHandler(stream=output_stream)
-            stream_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+            stream_handler.setFormatter(logging.Formatter('%(asctime)s - %(module_var)s - %(levelname)s - %(message)s'))
             stream_handler.setLevel(logging.INFO)
             logger.addHandler(stream_handler)
         logger.setLevel(logging.INFO)
+        logger.propagate = False
         self.logger = logger
 
-    def print_and_run(self, command, out=None, err=None):
+    def print_and_run(self, command: str, out: str = None, err: str = None, module_name: str = None):
         self.command_counter += 1
+        if out is not None:
+            command += ' > ' + out
+        if err is not None:
+            command += ' 2> ' + err
+
+        if module_name is None:
+            self.logging_extra = {'module_var': self.name}
+        else:
+            self.logging_extra = {'module_var': module_name}
+
         if self.command_counter < self.start or self.command_counter > self.end:
             self._print_skip_command(command)
         else:
-            if out is not None:
-                command += ' > ' + out
-            if err is not None:
-                command += ' 2> ' + err
             self._private_print_and_run(command, command)
 
     def print_and_run_clt(self, clt, positional_args: list, optional_args: dict, flags: set = {}):
@@ -64,7 +74,7 @@ class SimplePipeline:
             clt(['internal_tool'] + all_args)
             end = time.time()
             if self.print_timing:
-                self.logger.info('Time elapsed %s: %d s' % (tool_name, end - start))
+                self.logger.info('Time elapsed %s: %d s' % (tool_name, end - start), extra=self.logging_extra)
 
     def run_parallel(self, commands, max_num_of_processes):
         self.command_counter += 1
@@ -94,7 +104,7 @@ class SimplePipeline:
 
             if self.print_timing:
                 end = time.time()
-                self.logger.info('Time elapsed %s: %d s' % (program_name, end - start))
+                self.logger.info('Time elapsed %s: %d s' % (program_name, end - start), extra=self.logging_extra)
         else:
             [self._print_command(command) for command in commands]
 
@@ -120,7 +130,7 @@ class SimplePipeline:
         parser.add_argument('-fc', default=0, help='Index of the first command to execute')
         parser.add_argument('-lc', default=10000, help='Index of the last command to execute')
 
-    def _private_print_and_run(self, command, command_to_print):
+    def _private_print_and_run(self, command: str, command_to_print: str):
         program_name = self.get_program_name(command)
         self._print_command(command_to_print)
         if self.execute:
@@ -128,19 +138,19 @@ class SimplePipeline:
             if rv != 0:
                 raise RuntimeError("Failed: %d) %s" % (self.command_counter, command_to_print))
             if self.print_timing:
-                self.logger.info('Time elapsed %s: %d s' % (program_name, time_in_seconds))
+                self.logger.info('Time elapsed %s: %d s' % (program_name, time_in_seconds), extra=self.logging_extra)
 
     def _print_command(self, command_to_print):
-        self.logger.info(f'{self.command_counter}) {command_to_print}')
+        self.logger.info(f'{self.command_counter}) {command_to_print}', extra=self.logging_extra)
 
     def _print_skip_command(self, command_to_print):
-        self.logger.info(f'Skip: {self.command_counter}) {command_to_print}')
+        self.logger.info(f'Skip: {self.command_counter}) {command_to_print}', extra=self.logging_extra)
 
     def _run_and_time(self, command, command_index_message=''):
         """
 
         :param command: command to execute
-        :param command_index: in case running multiprocesses the index of the command in batch 1-based,
+        :param command_index_message: in case running multiprocesses the index of the command in batch 1-based,
                               leave 0 for single command.
         :return: returncode, time_in_seconds, command
         """
@@ -149,13 +159,13 @@ class SimplePipeline:
         rv = completed_process.returncode
         for line in completed_process.stdout.split('\n'):
             if line != '':
-                self.logger.info(f'{command_index_message} {line}')
+                self.logger.info(f'{command_index_message} {line}', extra=self.logging_extra)
         for line in completed_process.stderr.split('\n'):
             if line != '':
                 lower_case = line.lower()
                 if 'error' in lower_case or 'failure' in lower_case:
-                    self.logger.error(f'{command_index_message} {line}')
+                    self.logger.error(f'{command_index_message} {line}', extra=self.logging_extra)
                 else:
-                    self.logger.log(STDERR_LEVEL, f'{command_index_message} {line}')
+                    self.logger.log(STDERR_LEVEL, f'{command_index_message} {line}', extra=self.logging_extra)
         end = time.time()
         return rv, end - start, command
