@@ -28,7 +28,7 @@ class SimplePipeline:
         self.end = int(end)
         self.print_timing = print_timing
         self.name = name
-        self.logging_extra = None
+        self.logging_extra = {'module_var': self.name}
         logger = logging.getLogger(name)
         if output_stream:
             stream_handler = logging.StreamHandler(stream=output_stream)
@@ -46,9 +46,8 @@ class SimplePipeline:
         if err is not None:
             command += ' 2> ' + err
 
-        if module_name is None:
-            self.logging_extra = {'module_var': self.name}
-        else:
+        old_logging_extra = self.logging_extra
+        if module_name is not None:
             self.logging_extra = {'module_var': module_name}
 
         if self.command_counter < self.start or self.command_counter > self.end:
@@ -56,12 +55,13 @@ class SimplePipeline:
         else:
             self._private_print_and_run(command, command)
 
+        self.logging_extra = old_logging_extra
+
     def print_and_run_clt(self, clt, positional_args: list, optional_args: dict, flags: set = {}, module_name: str = None):
         self.command_counter += 1
 
-        if module_name is None:
-            self.logging_extra = {'module_var': self.name}
-        else:
+        old_logging_extra = self.logging_extra
+        if module_name is not None:
             self.logging_extra = {'module_var': module_name}
 
         positional_args = [str(x) for x in positional_args]
@@ -82,8 +82,14 @@ class SimplePipeline:
             if self.print_timing:
                 self.logger.info('Time elapsed %s: %d s' % (tool_name, end - start), extra=self.logging_extra)
 
-    def run_parallel(self, commands, max_num_of_processes):
+        self.logging_extra = old_logging_extra
+
+    def run_parallel(self, commands, max_num_of_processes,  module_name: str = None):
         self.command_counter += 1
+        old_logging_extra = self.logging_extra
+        if module_name is not None:
+            self.logging_extra = {'module_var': module_name}
+
         if self.command_counter < self.start or self.command_counter > self.end:
             for command in commands:
                 self._print_skip_command(command)
@@ -113,6 +119,7 @@ class SimplePipeline:
                 self.logger.info('Time elapsed %s: %d s' % (program_name, end - start), extra=self.logging_extra)
         else:
             [self._print_command(command) for command in commands]
+        self.logging_extra = old_logging_extra
 
     @staticmethod
     def get_program_name(command):
