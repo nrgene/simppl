@@ -1,4 +1,6 @@
 # simppl
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fnrgene%2Fsimppl.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fnrgene%2Fsimppl?ref=badge_shield)
+
 ##### Package for writing simple command-line pipelines, and organized command-line toolboxes. 
 
 The package is composed of two separate but intertwined modules:
@@ -139,3 +141,7 @@ python -m <module_name> analyze_file_pipeline  resources/analyze_file_pipeline_i
 ## Distribution
 Distribution to pypi was done by following this manual:
 https://packaging.python.org/tutorials/packaging-projects/
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fnrgene%2Fsimppl.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fnrgene%2Fsimppl?ref=badge_large)
